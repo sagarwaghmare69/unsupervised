@@ -17,6 +17,11 @@ function unitTests.PCA()
 
    local pca = unsupervised.PCA()
    pca:train(data)
+
+   local mean = data:mean(1)
+
+   mytester:assertTensorEq(mean, pca.mean, precision,
+                           "Incorrect Mean vectors.")
 end
 
 function unsupervised.test(tests)
