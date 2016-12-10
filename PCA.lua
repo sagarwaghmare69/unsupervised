@@ -24,7 +24,6 @@ function PCA:_meanZero(X, mean, inplace)
    local tempMean = mean.new()
    tempMean:resizeAs(mean):copy(mean)
    tempMean:expandAs(tempMean, normedX)
-   -- This is done for GPU efficiency you could also directly use 'tempMean'
    local expandedMean = mean.new()
    expandedMean:resizeAs(tempMean):copy(tempMean)
    normedX:csub(expandedMean)
@@ -61,11 +60,11 @@ function PCA:train(X, inplace)
 end
 
 -- Project to PCA dimensions
-function PCA:project(X, M, meanZeroed, inplace)
+function PCA:project(X, meanZeroed, inplace, M)
    assert(self.trained, "PCA not trained.")
    local meanZeroed = meanZeroed or false
    local inplace = inplace or false
-   M = self.M or M
+   local M = self.M or M
 
    assert(M<=self.D, "M should be less than or equal to self.D.")
 
@@ -85,4 +84,26 @@ function PCA:project(X, M, meanZeroed, inplace)
    -- V = E_t
    local Y = torch.mm(normedX, V)
    return Y
+end
+
+-- Reconstruct X using M principal components
+function PCA:reconstruct(X, meanZeroed, inplace, M)
+   local M = self.M or M
+   local Y = self:project(X, M, meanZeroed, inplace)
+ 
+   -- Pick first M eigen vectors
+   local V = self.vectors[{{1, M}}]
+
+   -- reconstructed(X) = m + EY
+   --- transpose of (E*Y)
+   local reconX = torch.mm(Y, V)
+
+   --- reconX = m + EY
+   local tempMean = self.mean.new()
+   tempMean:resizeAs(self.mean):copy(self.mean)
+   tempMean:expandAs(tempMean, reconX)
+   local expandedMean = self.mean.new()
+   expandedMean:resizeAs(tempMean):copy(tempMean)
+   reconX:add(expandedMean)
+   return reconX
 end
