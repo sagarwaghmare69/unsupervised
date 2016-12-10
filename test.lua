@@ -16,7 +16,7 @@ function unitTests.PCA()
    local data = torch.rand(N, D)
 
    local pca = unsupervised.PCA()
-   pca:process(data)
+   pca:train(data)
 end
 
 function unsupervised.test(tests)
