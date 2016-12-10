@@ -7,7 +7,7 @@ source = {
 }
 
 description = {
-   summary = "Unsupervised learning methods",
+   summary = "Unsupervised learning algorithms",
    detailed = [[PCA, Factor Analysis, Expectation Maximization etc.]],
    homepage = "https://github.com/sagarwaghmare69/unsupervised",
    license = "BSD"

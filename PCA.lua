@@ -3,13 +3,15 @@
    Ref: 15.2.3 PCA Algorithm Bayesian Reasoning and Machine Learning
 --]]
 
-local PCA = torch.class('unsupervised.PCA')
+local PCA, parent = torch.class('unsupervised.PCA',
+                                'unsupervised.ParentModule')
 
 function PCA:__init()
+   self.train = false
 end
 
 -- data is NxD tensor.
-function PCA:doPCA(data, M, inplace)
+function PCA:process(data, M, inplace)
    self.inplace = inplace or false
 
    self.N = data:size(1)
@@ -28,7 +30,7 @@ function PCA:doPCA(data, M, inplace)
    end
    local tempMean = self.mean.new()
    tempMean:resizeAs(self.mean):copy(self.mean)
-   tempMean:expandAs(data)
+   tempMean:expandAs(tempMean, data)
    -- This is done for GPU efficiency you could also directly use 'tempMean'
    local expandedMean = self.mean.new()
    expandedMean:resizeAs(tempMean):copy(tempMean)
@@ -39,5 +41,14 @@ function PCA:doPCA(data, M, inplace)
    self.covar:div(self.N - 1)
 
    -- Eigen value decomposition for Symmetric matrix
-   self.values, self.vectors = torch.symeig(self.covar, 'V') 
+   local values, vectors = torch.symeig(self.covar, 'V')
+
+   --[[ Output returned by symeig are in ascending order or eigen values
+        hence reversing the order --]]
+   local indices = torch.linspace(self.D, 1, self.D):long()
+   self.values = values.new()
+   self.vectors = vectors.new()
+   self.values:index(values, 1, indices)
+   self.vectors:index(vectors, 1, indices)
+   self.train = true
 end
