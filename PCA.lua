@@ -11,25 +11,6 @@ function PCA:__init(M)
    self.M = M
 end
 
-function PCA:_meanZero(X, mean, inplace)
-   local inplace = inplace or false
-
-   -- Mean zero the X
-   local normedX = X.new()
-   if inplace then
-      normedX = X
-   else
-      normedX:resizeAs(X):copy(X)
-   end
-   local tempMean = mean.new()
-   tempMean:resizeAs(mean):copy(mean)
-   tempMean:expandAs(tempMean, normedX)
-   local expandedMean = mean.new()
-   expandedMean:resizeAs(tempMean):copy(tempMean)
-   normedX:csub(expandedMean)
-   return normedX
-end
-
 -- data is NxD tensor.
 function PCA:train(X, inplace)
    self.N = X:size(1)

@@ -7,3 +7,4 @@ require('unsupervised.test')
 
 require('unsupervised.ParentModule')
 require('unsupervised.PCA')
+require('unsupervised.LSA')
