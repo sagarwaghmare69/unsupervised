@@ -7,8 +7,8 @@
    Ref: 15.4 Bayesian Reasoning and Machine Learning
 --]]
 
-local LSA, parent = torch.class("unsupervised.LSA",
-                                "unsupervised.ParentModule")
+local LSA, parent = torch.class('unsupervised.LSA',
+                                'unsupervised.ParentModule')
 
 -- If rescale is false then this is same as PCA-SVD
 function LSA:__init(M, rescale)
