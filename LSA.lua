@@ -12,7 +12,11 @@ local LSA, parent = torch.class("unsupervised.LSA", "unsupervised.PCA")
 -- If rescale is false then this is same as PCA-SVD
 function LSA:__init(M, rescale)
    parent.__init(self, M)
-   self.rescale = rescale or true -- Default rescale projections
+   if rescale == nil then
+      self.rescale = true -- Default rescale projections
+   else
+      self.rescale = rescale
+   end
 end
 
 function LSA:train(X, inplace)
