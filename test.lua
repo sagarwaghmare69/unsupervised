@@ -34,6 +34,10 @@ function unitTests.PCA()
    local yMean = Y:mean(1)
    mytester:assertTensorEq(yMean, torch.zeros(1, M), precision,
          "Projected vectors Mean should be very close to zero.")
+
+   local reconX = pca:reconstruct(data)
+   mytester:assertGeneralEq(data:size(), reconX:size(), 0,
+                           "X and reconX should have same size.")
 end
 
 -- Unit test: Latent Semantic Analysis
@@ -71,6 +75,10 @@ function unitTests.LSA()
    mytester:assertTensorEq(yStd, torch.ones(1, M), 0.1,
          "Projected vectors Std should be very close to one.")
 
+   local reconX = lsa:reconstruct(data)
+   mytester:assertGeneralEq(data:size(), reconX:size(), 0,
+                           "X and reconX should have same size.")
+
    -- Rescaling disabled
    local lsa = unsupervised.LSA(M, false)
    lsa:train(data)
@@ -95,6 +103,10 @@ function unitTests.LSA()
    local yStd = Y:std(1)
    mytester:assertTensorNe(yStd, torch.zeros(1, M), 0.2,
          "Projected vectors Std should not be close to one.")
+
+   local reconX = lsa:reconstruct(data)
+   mytester:assertGeneralEq(data:size(), reconX:size(), 0,
+                           "X and reconX should have same size.")
 end
 
 

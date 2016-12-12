@@ -7,11 +7,13 @@
    Ref: 15.4 Bayesian Reasoning and Machine Learning
 --]]
 
-local LSA, parent = torch.class("unsupervised.LSA", "unsupervised.PCA")
+local LSA, parent = torch.class("unsupervised.LSA",
+                                "unsupervised.ParentModule")
 
 -- If rescale is false then this is same as PCA-SVD
 function LSA:__init(M, rescale)
-   parent.__init(self, M)
+   parent.__init(self)
+   self.M = M
    if rescale == nil then
       self.rescale = true -- Default rescale projections
    else
@@ -76,4 +78,33 @@ function LSA:project(X, meanZeroed, inplace, M)
       Y = tempY
    end
    return Y
+end
+
+-- Reconstruct X using U and D
+function LSA:reconstruct(X, meanZeroed, inplace, M)
+   local reconX = X.new()
+   local M = self.M or M
+   local Y = self:project(X, M, meanZeroed, inplace)
+
+   -- Pick first M eigen vectors
+   local U = self.vectors[{{1, M}}]
+
+   if self.rescale then
+      local D = torch.diag(self.Dvalues[{{1, M}}])
+      local tempReconX = torch.mm(Y, D)
+      reconX = torch.mm(tempReconX, U)
+      reconX:div(math.sqrt(self.N-1))
+   else
+      -- Similar to PCA
+      reconX = torch.mm(Y, U) 
+   end
+
+   -- Add mean
+   local tempMean = self.mean.new()
+   tempMean:resizeAs(self.mean):copy(self.mean)
+   tempMean:expandAs(tempMean, reconX)
+   local expandedMean = self.mean.new()
+   expandedMean:resizeAs(tempMean):copy(tempMean)
+   reconX:add(expandedMean)
+   return reconX
 end
